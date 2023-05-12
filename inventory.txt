@@ -1,0 +1,8 @@
+[myhosts]
+myhost app_versions=1.0,2.0
+
+[myhosts:vars]
+app_name=myapp
+app_image=myimage
+app_port=8000
+
