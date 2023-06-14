@@ -1,0 +1,3 @@
+[submodule "app/rubydemo"]
+    path = app/rubydemo
+    url = <URL>

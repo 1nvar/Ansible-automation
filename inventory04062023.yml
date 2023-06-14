@@ -1,0 +1,35 @@
+- hosts: myhosts
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"
+    ansible_ssh_private_key_file: /home/vladyslav/project/.vagrant/machines/default/virtualbox/private_key
+  
+  tasks:
+    - name: Install Docker
+      become: true
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start Docker service
+      become: true
+      service:
+        name: docker
+        state: started
+
+    - name: Copy application code to the virtual machine
+      become: true
+      synchronize:
+        src: /home/vladyslav/project/rubydemo
+        dest: /home/vagrant/app
+
+    - name: Change directory to the application folder
+      become: true
+      shell: cd /home/vagrant/app/rubydemo
+
+    - name: Build Docker image
+      become: true
+      command: docker build -t my-ruby-app /home/vagrant/app/rubydemo
+
+    - name: Run the container
+      become: true
+      command: docker run -d --name my-ruby-container -p 80:3000 my-ruby-app

@@ -1,0 +1,39 @@
+---
+- hosts: myremote
+  become: yes
+  vars:
+    app_name: myapp
+    app_image: myapp
+    app_port: 5000
+  tasks:
+    - name: "Stop Docker container {{ app_name }}"
+      docker_container:
+        name: "{{ app_name }}"
+        state: stopped
+      when: docker_container_info.State == 'running'
+      register: stopped
+
+    - name: "Remove Docker container {{ app_name }}"
+      docker_container:
+        name: "{{ app_name }}"
+        state: absent
+      when: stopped is defined and stopped is changed
+
+    - name: "Remove Docker image {{ app_image }}"
+      docker_image:
+        name: "{{ app_image }}"
+        state: absent
+
+    - name: "Build Docker image from Dockerfile"
+      docker_image:
+        build:
+          path: "/path/to/Dockerfile"
+          tag: "{{ app_image }}"
+
+    - name: "Run Docker container from image {{ app_image }}"
+      docker_container:
+        name: "{{ app_name }}"
+        image: "{{ app_image }}"
+        state: started
+        ports:
+          - "{{ app_port }}:{{ app_port }}"
