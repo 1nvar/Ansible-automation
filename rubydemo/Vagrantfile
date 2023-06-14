@@ -1,0 +1,28 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+    vb.cpus = "2"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    # Установка Docker
+    apt-get update
+    apt-get install -y docker.io
+    systemctl start docker
+    systemctl enable docker
+
+    # Копирование Dockerfile и кода приложения на виртуальную машину
+    mkdir /vagrant/app
+    cp /vagrant/rubydemo/Dockerfile /vagrant/app/
+    cp -r /vagrant/rubydemo* /vagrant/app/
+    cd /vagrant/app
+
+    # Сборка Docker-образа
+    docker build -t my-ruby-app .
+
+    # Запуск контейнера
+    docker run -d --name my-ruby-container -p 80:3000 my-ruby-app
+  SHELL
+end
